@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 # Initialize the video capture
-video_path = "C:\\Users\\USER\\pyproj\\test2.mp4"
+video_path = "C:\\Users\\USER\\Downloads\\testmain.mp4"
 cap = cv2.VideoCapture(video_path)
 
 # Initialize the object tracker
@@ -24,7 +24,10 @@ ok = tracker.init(frame, bbox)
 
 path = []
 frame_height, frame_width = frame.shape[:2]
-blank_image = np.zeros((frame_height, frame_width, 3), np.uint8)
+
+# Initialize the video writer
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+out = cv2.VideoWriter('output_with_path.mp4', fourcc, int(cap.get(cv2.CAP_PROP_FPS)), (frame_width, frame_height))
 
 while True:
     # Read a new frame
@@ -46,8 +49,22 @@ while True:
         # Tracking failure
         cv2.putText(frame, "Tracking failure detected", (100, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
 
-    # Display the frame
-    cv2.imshow("Tracking", frame)
+    # Create a blank frame for drawing the path
+    path_frame = np.zeros((frame_height, frame_width, 3), np.uint8)
+
+    # Draw the path as a continuous line on the blank frame
+    if len(path) > 1:
+        for i in range(1, len(path)):
+            cv2.line(path_frame, path[i - 1], path[i], (0, 255, 0), 5)
+
+    # Combine the original frame with the path frame
+    combined_frame = cv2.addWeighted(frame, 0.7, path_frame, 0.3, 0)
+
+    # Write the combined frame to the output video
+    out.write(combined_frame)
+
+    # Display the combined frame
+    cv2.imshow("Tracking", combined_frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -56,12 +73,6 @@ while True:
 with open("path.json", "w") as f:
     json.dump(path, f)
 
-# Draw the complete path on the blank image
-for point in path:
-    cv2.circle(blank_image, point, 3, (0, 255, 0), -1)
-
-# Save the path image
-cv2.imwrite("path_image.png", blank_image)
-
 cap.release()
+out.release()
 cv2.destroyAllWindows()
