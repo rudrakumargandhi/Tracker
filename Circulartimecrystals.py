@@ -22,7 +22,7 @@ def cluster_points(path, cluster_size):
     return clusters
 
 # Function to adjust circles to avoid complete overlap
-def adjust_circles(centroids, radii):
+"""def adjust_circles(centroids, radii):
     adjusted_centroids = centroids.copy()
     for i in range(len(centroids)):
         for j in range(i + 1, len(centroids)):
@@ -33,7 +33,7 @@ def adjust_circles(centroids, radii):
                 adjustment = direction * (overlap / 2 + 1)
                 adjusted_centroids[j] += adjustment
                 adjusted_centroids[i] -= adjustment
-    return adjusted_centroids
+    return adjusted_centroids """
 
 # Load the recorded path
 with open("path.json", "r") as f:
@@ -43,7 +43,7 @@ with open("path.json", "r") as f:
 path = np.array(path)
 
 # Define the number of points per cluster
-cluster_size = 100
+cluster_size = 500
 
 # Calculate the clusters
 clusters = cluster_points(path, cluster_size)
@@ -53,18 +53,18 @@ centroids = np.array([calculate_centroid(cluster) for cluster in clusters])
 radii = np.array([calculate_radius(cluster, centroid) for cluster, centroid in zip(clusters, centroids)])
 
 # Adjust the centroids to avoid completely overlapping circles
-adjusted_centroids = adjust_circles(centroids, radii)
+#adjusted_centroids = adjust_circles(centroids, radii)
 
 # Plot the circles
 fig, ax = plt.subplots()
 
-for centroid, radius in zip(adjusted_centroids, radii):
+for centroid, radius in zip(centroids, radii):
     circle = plt.Circle((centroid[0], centroid[1]), radius, color='b', alpha=0.3)
     ax.add_artist(circle)
 
 # Ensure the plot scales correctly
-ax.set_xlim(path[:, 0].min() - 10, path[:, 0].max() + 10)
-ax.set_ylim(path[:, 1].min() - 10, path[:, 1].max() + 10)
+ax.set_xlim(path[:, 0].min() - 500, path[:, 0].max() + 500)
+ax.set_ylim(path[:, 1].min() - 500, path[:, 1].max() + 500)
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_title('2D Path Representation with Circles')
